@@ -33,10 +33,30 @@ class PathDataset(Dataset):
         imP = self.jpgPaths[index]
         txtP = imP.replace('.jpg','.txt')
         im = Image.open(imP).convert('L')
+        """
+        图片名和标签名相同如：a.jpg，a.txt
+        """
         with open(txtP)  as f:
             label = f.read().strip()
+            """
+            strip()的参数为空，那么会默认删除字符串头和尾的空白字符(包括\n，\r，\t这些)
+            """
             
         label = ''.join([ x for x in label if x in self.alphabetChinese ])
+        """
+        join返回通过指定字符连接序列中元素后生成的新字符串
+        s1 = "-"
+        s2 = ""
+        seq = ("r", "u", "n", "o", "o", "b") # 字符串序列
+        print (s1.join( seq ))
+        print (s2.join( seq ))
+        输出：
+        r-u-n-o-o-b
+        runoob
+        
+        语句x for x in label if x in self.alphabetChinese 的含义参考：
+        https://blog.csdn.net/liukai2918/article/details/80428441
+        """
             
         if self.transform is not None:
          
@@ -88,7 +108,18 @@ class randomSequentialSampler(sampler.Sampler):
         index = torch.LongTensor(len(self)).fill_(0)
         for i in range(n_batch):
             random_start = random.randint(0, len(self) - self.batch_size)
+            """
+            random.randint(a,b)用于生成一个指定范围内的整数。其中参数a是下限，参数b是上限，生成的随机数n: a <= n <= b
+            """
             batch_index = random_start + torch.arange(0, self.batch_size )
+            """
+            torch.arange(start, end, step=1, out=None):
+           返回一个1维张量，长度为floor((end-start)/step)，以step`为步长的一组序列值。
+           start (float) - 起点
+           end (float) - 终点(不包含）
+           step (float) - 相邻点的间隔大小
+           out (Tensor, optional)
+            """
             index[i * self.batch_size:(i + 1) * self.batch_size] = batch_index
         # deal with tail
         if tail:
@@ -120,8 +151,8 @@ class alignCollate(object):
             for image in images:
                 w, h = image.size
                 ratios.append(w / float(h))
-            ratios.sort()
-            max_ratio = ratios[-1]
+            ratios.sort()#正向排序
+            max_ratio = ratios[-1]#[-1] 读取倒数第一个元素 
             imgW = int(np.floor(max_ratio * imgH))
             imgW = max(imgH * self.min_ratio, imgW)  # assure imgH >= imgW
 
